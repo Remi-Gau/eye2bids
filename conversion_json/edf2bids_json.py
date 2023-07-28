@@ -15,7 +15,7 @@ for filename_edf in glob.glob("*.EDF"):
     edf_files_list.append(filename_edf)
 
 #convert events from edf to filename_edf+_events.asc and storing it in cwd
-for file in edf_files_list:
+for _ in edf_files_list:
     subprocess.run(['edf2asc', '-y' ,'-e', filename_edf, filename_edf+ "_events"]) 
 
 #make events asc file a variable in list
@@ -31,7 +31,7 @@ with open(filename_events_asc) as f:
     events=f.readlines()
 
 #save messages
-message=[ms for ms in events if ms.startswith("MSG")] 
+message=[ms for ms in events if ms.startswith("MSG")]
 df_ms=pd.DataFrame([ms.split() for ms in message])    
 
 #don't need MSG and sample columns
@@ -111,15 +111,15 @@ CalibrationList=cal_list[[4, 6, 11, 9, 1]].values.tolist()
 
 #CalibrationPosition
 ## get list with calibration positions for every calibration run
-cal_pos= df_ms_reduced[df_ms_reduced[2] == "VALIDATE"] 
+cal_pos= df_ms_reduced[df_ms_reduced[2] == "VALIDATE"]
 ## get number of calibration points per calibration run
-cal_pos_num=int(len(cal_pos.index)/len(cal_count.index)) 
+cal_pos_num = len(cal_pos.index) // len(cal_count.index)
 ## make calibration positions for every calibration run a single list
-cal_pos_list=cal_pos[8].values.tolist() 
-## split list per calibration run and make it a list
-cal_chunk_list=list()
-for i in range(0, len(cal_pos_list), cal_pos_num):
-    cal_chunk_list.append(cal_pos_list[i:i+cal_list_num])
+cal_pos_list=cal_pos[8].values.tolist()
+cal_chunk_list = [
+    cal_pos_list[i : i + cal_list_num]
+    for i in range(0, len(cal_pos_list), cal_pos_num)
+]
 #TODO: make values in list to integers, somehow...
 
 #CalibrationType
@@ -144,12 +144,12 @@ pupil_fit = df_ms_reduced[df_ms_reduced[2] == "ELCL_PROC"]
 PupilFitMethod = pupil_fit.iloc[0:1, 1:2].to_string(header=False, index=False)
 
 #StartTime
-start=[st for st in events if st.startswith("START")] 
+start=[st for st in events if st.startswith("START")]
 df_st=pd.DataFrame([st.split() for st in start])
 
 
 #StopTime
-stop=[so for so in events if so.startswith("STOP")] 
+stop=[so for so in events if so.startswith("STOP")]
 df_st=pd.DataFrame([st.split() for st in start])
 
 
@@ -197,7 +197,7 @@ print(json.dumps(events, indent=9))
 
 
 #convert samples from edf to filename_edf+_samples.asc and storing it in cwd
-for file in edf_files_list:
+for _ in edf_files_list:
     subprocess.run(['edf2asc', '-y' ,'-s', filename_edf, filename_edf+ "_samples"]) 
 
 #make samples asc file a variable
@@ -213,22 +213,22 @@ samples_dataframe=pd.read_table(filename_samples_asc, index_col=False,
 
 
 #save fixations 
-fixation=[fe for fe in events if fe.startswith("EFIX")] 
+fixation=[fe for fe in events if fe.startswith("EFIX")]
 df_fx=pd.DataFrame([fe.split() for fe in fixation])
 #df_fx.rename(columns={4: "fixation_duration"})
 fixation_duration = pd.DataFrame(df_fx[2],[4])
 
 #save saccades
-saccade=[sa for sa in events if sa.startswith("ESAC")] 
+saccade=[sa for sa in events if sa.startswith("ESAC")]
 df_sa=pd.DataFrame([sa.split() for sa in saccade])
 saccade_duration = df_sa[4]
 
 #save blinks
-blink=[bi for bi in events if bi.startswith("EBLINK")] 
+blink=[bi for bi in events if bi.startswith("EBLINK")]
 df_bi=pd.DataFrame([bi.split() for bi in blink])
 blink_duration = df_bi[4]
 
 #save messages
-message=[ms for ms in events if ms.startswith("MSG")] 
+message=[ms for ms in events if ms.startswith("MSG")]
 df_ms=pd.DataFrame([ms.split() for ms in message])
 
